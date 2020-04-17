@@ -1,7 +1,7 @@
 FROM python:3.8-buster
 
 MAINTAINER Dominik S. Buse (buse@ccs-labs.org)
-LABEL Description="Dockerised Simulation of Urban MObility(SUMO)"
+LABEL Description="Dockerised Simulation of Urban MObility (SUMO)"
 
 ENV SUMO_VERSION 1_1_0
 ENV SUMO_HOME /opt/sumo
@@ -17,7 +17,8 @@ RUN apt-get update && apt-get -qq install \
     libfox-1.6-0 libfox-1.6-dev \
     libgdal-dev \
     libproj-dev \
-    python2.7
+    python2.7 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Download and extract source code
 RUN cd /tmp &&\
