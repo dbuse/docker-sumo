@@ -1,0 +1,288 @@
+diff -Naur 0.32.0/src/jtrrouter/ROJTREdge.h 0.32.0-patched/src/jtrrouter/ROJTREdge.h
+--- 0.32.0/src/jtrrouter/ROJTREdge.h	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/jtrrouter/ROJTREdge.h	2018-07-03 16:17:33.074893261 +0200
+@@ -111,7 +111,7 @@
+ 
+ private:
+     /// @brief Definition of a map that stores the probabilities of using a certain follower over time
+-    typedef std::map<ROJTREdge*, ValueTimeLine<double>*, Named::ComparatorIdLess> FollowerUsageCont;
++    typedef std::map<ROJTREdge*, ValueTimeLine<double>*, ComparatorIdLess> FollowerUsageCont;
+ 
+     /// @brief Storage for the probabilities of using a certain follower over time
+     FollowerUsageCont myFollowingDefs;
+diff -Naur 0.32.0/src/microsim/devices/MSDevice_Tripinfo.h 0.32.0-patched/src/microsim/devices/MSDevice_Tripinfo.h
+--- 0.32.0/src/microsim/devices/MSDevice_Tripinfo.h	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/microsim/devices/MSDevice_Tripinfo.h	2018-07-03 16:19:52.585634551 +0200
+@@ -228,7 +228,7 @@
+     SUMOTime myMesoTimeLoss;
+ 
+     /// @brief devices which may still need to produce output
+-    typedef std::set<const MSDevice_Tripinfo*, Named::NamedLikeComparatorIdLess<MSDevice_Tripinfo> > DeviceSet;
++    typedef std::set<const MSDevice_Tripinfo*, ComparatorIdLess > DeviceSet;
+ 
+     static DeviceSet myPendingOutput;
+ 
+diff -Naur 0.32.0/src/microsim/devices/MSDevice_Vehroutes.cpp 0.32.0-patched/src/microsim/devices/MSDevice_Vehroutes.cpp
+--- 0.32.0/src/microsim/devices/MSDevice_Vehroutes.cpp	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/microsim/devices/MSDevice_Vehroutes.cpp	2018-07-03 16:20:10.122395590 +0200
+@@ -384,7 +384,7 @@
+ 
+ void
+ MSDevice_Vehroutes::generateOutputForUnfinished() {
+-    for (std::map<const SUMOVehicle*, MSDevice_Vehroutes*, Named::NamedLikeComparatorIdLess<SUMOVehicle> >::const_iterator it = myStateListener.myDevices.begin();
++    for (std::map<const SUMOVehicle*, MSDevice_Vehroutes*, ComparatorIdLess >::const_iterator it = myStateListener.myDevices.begin();
+             it != myStateListener.myDevices.end(); ++it) {
+         if (it->first->hasDeparted()) {
+             it->second->writeOutput(false);
+diff -Naur 0.32.0/src/microsim/devices/MSDevice_Vehroutes.h 0.32.0-patched/src/microsim/devices/MSDevice_Vehroutes.h
+--- 0.32.0/src/microsim/devices/MSDevice_Vehroutes.h	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/microsim/devices/MSDevice_Vehroutes.h	2018-07-03 16:20:36.682538963 +0200
+@@ -218,7 +218,7 @@
+         void vehicleStateChanged(const SUMOVehicle* const vehicle, MSNet::VehicleState to);
+ 
+         /// @brief A map for internal notification
+-        std::map<const SUMOVehicle*, MSDevice_Vehroutes*, SUMOVehicle::ComparatorIdLess> myDevices;
++        std::map<const SUMOVehicle*, MSDevice_Vehroutes*, ComparatorIdLess> myDevices;
+ 
+     };
+ 
+diff -Naur 0.32.0/src/microsim/MSEdgeControl.cpp 0.32.0-patched/src/microsim/MSEdgeControl.cpp
+--- 0.32.0/src/microsim/MSEdgeControl.cpp	2017-12-19 08:43:20.000000000 +0100
++++ 0.32.0-patched/src/microsim/MSEdgeControl.cpp	2018-07-03 16:17:50.121649515 +0200
+@@ -77,7 +77,7 @@
+ 
+ void
+ MSEdgeControl::patchActiveLanes() {
+-    for (std::set<MSLane*, Named::ComparatorIdLess>::iterator i = myChangedStateLanes.begin(); i != myChangedStateLanes.end(); ++i) {
++    for (std::set<MSLane*, ComparatorIdLess>::iterator i = myChangedStateLanes.begin(); i != myChangedStateLanes.end(); ++i) {
+         LaneUsage& lu = myLanes[(*i)->getNumericalID()];
+         // if the lane was inactive but is now...
+         if (!lu.amActive && (*i)->getVehicleNumber() > 0) {
+diff -Naur 0.32.0/src/microsim/MSEdgeControl.h 0.32.0-patched/src/microsim/MSEdgeControl.h
+--- 0.32.0/src/microsim/MSEdgeControl.h	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/microsim/MSEdgeControl.h	2018-07-03 16:18:02.265046847 +0200
+@@ -220,7 +220,7 @@
+     std::vector<MSLane*> myWithVehicles2Integrate;
+ 
+     /// @brief Lanes which changed the state without informing the control
+-    std::set<MSLane*, Named::ComparatorIdLess> myChangedStateLanes;
++    std::set<MSLane*, ComparatorIdLess> myChangedStateLanes;
+ 
+     /// @brief The list of active (not empty) lanes
+     std::vector<SUMOTime> myLastLaneChange;
+diff -Naur 0.32.0/src/microsim/MSLane.cpp 0.32.0-patched/src/microsim/MSLane.cpp
+--- 0.32.0/src/microsim/MSLane.cpp	2017-12-19 08:43:20.000000000 +0100
++++ 0.32.0-patched/src/microsim/MSLane.cpp	2018-07-03 16:18:53.618652422 +0200
+@@ -1172,7 +1172,7 @@
+     if (myVehicles.size() == 0 || myCollisionAction == COLLISION_ACTION_NONE) {
+         return;
+     }
+-    std::set<const MSVehicle*, SUMOVehicle::ComparatorIdLess> toRemove;
++    std::set<const MSVehicle*, ComparatorIdLess> toRemove;
+     std::set<const MSVehicle*> toTeleport;
+     if (MSGlobals::gLateralResolution <= 0 && MSGlobals::gLaneChangeDuration <= 0) {
+         // no sublanes
+@@ -1304,7 +1304,7 @@
+     }
+ 
+ 
+-    for (std::set<const MSVehicle*, SUMOVehicle::ComparatorIdLess>::iterator it = toRemove.begin(); it != toRemove.end(); ++it) {
++    for (std::set<const MSVehicle*, ComparatorIdLess>::iterator it = toRemove.begin(); it != toRemove.end(); ++it) {
+         MSVehicle* veh = const_cast<MSVehicle*>(*it);
+         MSLane* vehLane = veh->getLane();
+         vehLane->removeVehicle(veh, MSMoveReminder::NOTIFICATION_TELEPORT, false);
+@@ -1353,7 +1353,7 @@
+ 
+ bool
+ MSLane::detectCollisionBetween(SUMOTime timestep, const std::string& stage, MSVehicle* collider, MSVehicle* victim,
+-                               std::set<const MSVehicle*, SUMOVehicle::ComparatorIdLess>& toRemove,
++                               std::set<const MSVehicle*, ComparatorIdLess>& toRemove,
+                                std::set<const MSVehicle*>& toTeleport) const {
+ #ifndef NO_TRACI
+     if (myCollisionAction == COLLISION_ACTION_TELEPORT && ((victim->hasInfluencer() && victim->getInfluencer().isRemoteAffected(timestep)) ||
+@@ -1416,7 +1416,7 @@
+ 
+ void
+ MSLane::handleCollisionBetween(SUMOTime timestep, const std::string& stage, MSVehicle* collider, MSVehicle* victim,
+-                               double gap, double latGap, std::set<const MSVehicle*, SUMOVehicle::ComparatorIdLess>& toRemove,
++                               double gap, double latGap, std::set<const MSVehicle*, ComparatorIdLess>& toRemove,
+                                std::set<const MSVehicle*>& toTeleport) const {
+     std::string prefix = "Vehicle '" + collider->getID() + "'; collision with vehicle '" + victim->getID() ;
+     if (myCollisionStopTime > 0) {
+diff -Naur 0.32.0/src/microsim/MSLane.h 0.32.0-patched/src/microsim/MSLane.h
+--- 0.32.0/src/microsim/MSLane.h	2017-12-19 08:43:20.000000000 +0100
++++ 0.32.0-patched/src/microsim/MSLane.h	2018-07-03 16:19:05.242047705 +0200
+@@ -1098,13 +1098,13 @@
+ 
+     /// @brief detect whether there is a collision between the two vehicles
+     bool detectCollisionBetween(SUMOTime timestep, const std::string& stage, MSVehicle* collider, MSVehicle* victim,
+-                                std::set<const MSVehicle*, SUMOVehicle::ComparatorIdLess>& toRemove,
++                                std::set<const MSVehicle*, ComparatorIdLess>& toRemove,
+                                 std::set<const MSVehicle*>& toTeleport) const;
+ 
+     /// @brief take action upon collision
+     void handleCollisionBetween(SUMOTime timestep, const std::string& stage, MSVehicle* collider, MSVehicle* victim,
+                                 double gap, double latGap,
+-                                std::set<const MSVehicle*, SUMOVehicle::ComparatorIdLess>& toRemove,
++                                std::set<const MSVehicle*, ComparatorIdLess>& toRemove,
+                                 std::set<const MSVehicle*>& toTeleport) const;
+ 
+     /// @brief compute maximum braking distance on this lane
+diff -Naur 0.32.0/src/microsim/MSLink.h 0.32.0-patched/src/microsim/MSLink.h
+--- 0.32.0/src/microsim/MSLink.h	2017-12-19 08:43:20.000000000 +0100
++++ 0.32.0-patched/src/microsim/MSLink.h	2018-07-03 16:19:19.848792384 +0200
+@@ -204,7 +204,7 @@
+     ApproachingVehicleInformation getApproaching(const SUMOVehicle* veh) const;
+ 
+     /// @brief return all approaching vehicles
+-    const std::map<const SUMOVehicle*, ApproachingVehicleInformation, SUMOVehicle::ComparatorIdLess>& getApproaching() const {
++    const std::map<const SUMOVehicle*, ApproachingVehicleInformation, ComparatorIdLess>& getApproaching() const {
+         return myApproachingVehicles;
+     }
+ 
+@@ -529,7 +529,7 @@
+     /// @brief The lane approaching this link
+     MSLane* myLaneBefore;
+ 
+-    std::map<const SUMOVehicle*, ApproachingVehicleInformation, SUMOVehicle::ComparatorIdLess> myApproachingVehicles;
++    std::map<const SUMOVehicle*, ApproachingVehicleInformation, ComparatorIdLess> myApproachingVehicles;
+     std::set<MSLink*> myBlockedFoeLinks;
+ 
+     /// @brief The position within this respond
+diff -Naur 0.32.0/src/microsim/traffic_lights/MSRailSignal.cpp 0.32.0-patched/src/microsim/traffic_lights/MSRailSignal.cpp
+--- 0.32.0/src/microsim/traffic_lights/MSRailSignal.cpp	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/microsim/traffic_lights/MSRailSignal.cpp	2018-07-03 16:20:50.699281501 +0200
+@@ -215,7 +215,7 @@
+                 std::map<const MSLane*, const MSLink*>::iterator it = mySucceedingBlocksIncommingLinks.find(lane);
+                 if (it != mySucceedingBlocksIncommingLinks.end()) {
+                     const MSLink* inCommingLing = it->second;
+-                    const std::map<const SUMOVehicle*, MSLink::ApproachingVehicleInformation, SUMOVehicle::ComparatorIdLess> approaching = inCommingLing->getApproaching();
++                    const std::map<const SUMOVehicle*, MSLink::ApproachingVehicleInformation, ComparatorIdLess> approaching = inCommingLing->getApproaching();
+                     std::map<const SUMOVehicle*,  MSLink::ApproachingVehicleInformation>::const_iterator apprIt = approaching.begin();
+                     for (; apprIt != approaching.end(); apprIt++) {
+                         MSLink::ApproachingVehicleInformation info = apprIt->second;
+diff -Naur 0.32.0/src/netbuild/NBAlgorithms_Ramps.cpp 0.32.0-patched/src/netbuild/NBAlgorithms_Ramps.cpp
+--- 0.32.0/src/netbuild/NBAlgorithms_Ramps.cpp	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/netbuild/NBAlgorithms_Ramps.cpp	2018-07-03 16:21:19.762772586 +0200
+@@ -84,8 +84,8 @@
+         NBDistrictCont& dc = nb.getDistrictCont();
+ 
+         // if an edge is part of two ramps, ordering is important
+-        std::set<NBNode*, Named::ComparatorIdLess> potOnRamps;
+-        std::set<NBNode*, Named::ComparatorIdLess> potOffRamps;
++        std::set<NBNode*, ComparatorIdLess> potOnRamps;
++        std::set<NBNode*, ComparatorIdLess> potOffRamps;
+         for (std::map<std::string, NBNode*>::const_iterator i = nc.begin(); i != nc.end(); ++i) {
+             NBNode* cur = (*i).second;
+             if (mayNeedOnRamp(cur, minHighwaySpeed, maxRampSpeed, noramps)) {
+@@ -95,10 +95,10 @@
+                 potOffRamps.insert(cur);
+             }
+         }
+-        for (std::set<NBNode*, Named::ComparatorIdLess>::const_iterator i = potOnRamps.begin(); i != potOnRamps.end(); ++i) {
++        for (std::set<NBNode*, ComparatorIdLess>::const_iterator i = potOnRamps.begin(); i != potOnRamps.end(); ++i) {
+             buildOnRamp(*i, nc, ec, dc, rampLength, dontSplit);
+         }
+-        for (std::set<NBNode*, Named::ComparatorIdLess>::const_iterator i = potOffRamps.begin(); i != potOffRamps.end(); ++i) {
++        for (std::set<NBNode*, ComparatorIdLess>::const_iterator i = potOffRamps.begin(); i != potOffRamps.end(); ++i) {
+             buildOffRamp(*i, nc, ec, dc, rampLength, dontSplit);
+         }
+     }
+diff -Naur 0.32.0/src/netbuild/NBEdgeCont.cpp 0.32.0-patched/src/netbuild/NBEdgeCont.cpp
+--- 0.32.0/src/netbuild/NBEdgeCont.cpp	2017-12-19 08:43:20.000000000 +0100
++++ 0.32.0-patched/src/netbuild/NBEdgeCont.cpp	2018-07-03 16:21:33.489513954 +0200
+@@ -1167,7 +1167,7 @@
+         avoid.insert(avoid.end(), reserve.begin(), reserve.end());
+     }
+     IDSupplier idSupplier("", avoid);
+-    std::set<NBEdge*, Named::ComparatorIdLess> toChange;
++    std::set<NBEdge*, ComparatorIdLess> toChange;
+     for (EdgeCont::iterator it = myEdges.begin(); it != myEdges.end(); it++) {
+         if (numericaIDs) {
+             try {
+@@ -1181,7 +1181,7 @@
+         }
+     }
+     const bool origNames = OptionsCont::getOptions().getBool("output.original-names");
+-    for (std::set<NBEdge*, Named::ComparatorIdLess>::iterator it = toChange.begin(); it != toChange.end(); ++it) {
++    for (std::set<NBEdge*, ComparatorIdLess>::iterator it = toChange.begin(); it != toChange.end(); ++it) {
+         NBEdge* edge = *it;
+         myEdges.erase(edge->getID());
+         if (origNames) {
+diff -Naur 0.32.0/src/netbuild/NBNodeCont.cpp 0.32.0-patched/src/netbuild/NBNodeCont.cpp
+--- 0.32.0/src/netbuild/NBNodeCont.cpp	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/netbuild/NBNodeCont.cpp	2018-07-03 16:21:53.426289338 +0200
+@@ -1306,7 +1306,7 @@
+         avoid.insert(avoid.end(), reserve.begin(), reserve.end());
+     }
+     IDSupplier idSupplier("", avoid);
+-    std::set<NBNode*, Named::ComparatorIdLess> toChange;
++    std::set<NBNode*, ComparatorIdLess> toChange;
+     for (NodeCont::iterator it = myNodes.begin(); it != myNodes.end(); it++) {
+         if (numericaIDs) {
+             try {
+@@ -1320,7 +1320,7 @@
+         }
+     }
+     const bool origNames = OptionsCont::getOptions().getBool("output.original-names");
+-    for (std::set<NBNode*, Named::ComparatorIdLess>::iterator it = toChange.begin(); it != toChange.end(); ++it) {
++    for (std::set<NBNode*, ComparatorIdLess>::iterator it = toChange.begin(); it != toChange.end(); ++it) {
+         NBNode* node = *it;
+         myNodes.erase(node->getID());
+         if (origNames) {
+diff -Naur 0.32.0/src/utils/common/Named.h 0.32.0-patched/src/utils/common/Named.h
+--- 0.32.0/src/utils/common/Named.h	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/utils/common/Named.h	2018-07-03 16:25:15.667404785 +0200
+@@ -34,6 +34,15 @@
+ #include <string>
+ #include <set>
+ 
++/// @brief Function-object for stable sorting of objects acting like Named without being derived (SUMOVehicle)
++// @note Numbers of different lenghts will not be ordered by alphanumerical sorting
++struct ComparatorIdLess {
++   template<class T>
++	bool operator()(const T* const a, const T* const b) const {
++		return a->getID() < b->getID();
++	}
++};
++
+ 
+ // ===========================================================================
+ // class definitions
+@@ -75,24 +84,6 @@
+     }
+ 
+ 
+-    /// @brief Function-object for stable sorting in containers
+-    // @note Numbers of different lengths will not be ordered by alphanumerical sorting
+-    struct ComparatorIdLess {
+-        bool operator()(Named* const a, Named* const b) const {
+-            return a->getID() < b->getID();
+-        }
+-    };
+-
+-    /// @brief Function-object for stable sorting of objects acting like Named without being derived (SUMOVehicle)
+-    // @note Numbers of different lenghts will not be ordered by alphanumerical sorting
+-    template <class NamedLike>
+-    struct NamedLikeComparatorIdLess {
+-        bool operator()(const NamedLike* const a, const NamedLike* const b) const {
+-            return a->getID() < b->getID();
+-        }
+-    };
+-
+-
+     /** @class StoringVisitor
+      * @brief Allows to store the object; used as context while traveling the rtree in TraCI
+      */
+diff -Naur 0.32.0/src/utils/vehicle/SUMOVehicle.h 0.32.0-patched/src/utils/vehicle/SUMOVehicle.h
+--- 0.32.0/src/utils/vehicle/SUMOVehicle.h	2017-12-08 19:34:59.000000000 +0100
++++ 0.32.0-patched/src/utils/vehicle/SUMOVehicle.h	2018-07-03 16:25:49.450926342 +0200
+@@ -76,8 +76,6 @@
+     virtual double getPreviousSpeed() const = 0;
+ 
+ 
+-    typedef Named::NamedLikeComparatorIdLess<SUMOVehicle> ComparatorIdLess;
+-
+     /// @brief Destructor
+     virtual ~SUMOVehicle() {}
+ 
