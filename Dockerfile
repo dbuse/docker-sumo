@@ -5,7 +5,8 @@ LABEL Description="Dockerised Simulation of Urban MObility (SUMO)"
 
 ENV SUMO_VERSION 1_1_0
 ENV SUMO_HOME /opt/sumo
-ENV SUMO_USER your_username
+
+# TODO: use separate container for build
 
 # Install system dependencies.
 RUN apt-get update && apt-get -qq install \
