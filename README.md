@@ -6,7 +6,7 @@
 Containerised SUMO with a custom python interpreter ready to run `TraCI`-enabled scripts
 
 [SUMO (Simulation of Urban MObility)](http://sumo.dlr.de/wiki/Simulation_of_Urban_MObility_-_Wiki), an open-source traffic simulation software, is dockeried by the `Dockerfile`s included in this repository.
-This image is based on the [base python image]() in the debian flavour and provides containers with different versions of Python and SUMO.
+This image is based on the [base python image](https://hub.docker.com/_/python) in the debian flavour and provides containers with different versions of Python and SUMO.
 
 ## References
 
